@@ -1,0 +1,8 @@
+Auto-Compressor
+https://code.google.com/p/auto-compressor/
+
+Source:
+https://code.google.com/p/auto-compressor/source/browse/trunk/compressor/lib/?r=67
+
+License:
+See source for details

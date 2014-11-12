@@ -1,0 +1,34 @@
+{
+    "name": "odan/molengo",
+    "type": "library",
+    "description": "Molengo Framework, a PHP micro framework",
+    "keywords": ["microframework"],
+    "homepage": "http://github.com/odan/molengo",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "odan",
+            "email": "odan@molengo.com",
+            "homepage": "http://www.molengo.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "phpmailer/phpmailer": "5.2.*",
+        "werkint/jsmin": "1.0.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.2.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Molengo": "src"
+        },
+        "files": ["src/Molengo/util.php"]
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
