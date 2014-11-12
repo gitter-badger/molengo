@@ -263,26 +263,15 @@ trait UserModel
     }
 
     /**
-     * Check login status
+     * Returns true if user is logged in
+     *
      * @param array $arrParams
      * @return boolean
      */
-    public function checkLogin($arrParams = array())
+    public function isAuth()
     {
         $numId = $this->getUserInfo('id');
         $boolStatus = !empty($numId);
-        $strRedirect = gv($arrParams, 'redirect');
-        if (!$boolStatus && $strRedirect) {
-            App::getResponse()->redirect($strRedirect);
-            exit;
-        }
-
-        if (!$boolStatus) {
-            header('HTTP/1.1 401 Unauthorized');
-            echo 'Unauthorized access';
-            exit;
-        }
-
         return $boolStatus;
     }
 
@@ -330,5 +319,4 @@ trait UserModel
 
         return $boolReturn;
     }
-
 }
