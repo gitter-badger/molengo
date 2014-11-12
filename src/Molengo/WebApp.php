@@ -109,6 +109,9 @@ class WebApp
      */
     protected static function initAll()
     {
+        // error reporting and handler
+        static::initErrorHandling();
+
         // session
         static::initSession();
 
