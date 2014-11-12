@@ -265,7 +265,6 @@ trait UserModel
     /**
      * Returns true if user is logged in
      *
-     * @param array $arrParams
      * @return boolean
      */
     public function isAuth()
