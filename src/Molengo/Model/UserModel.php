@@ -7,6 +7,16 @@ use App;
 trait UserModel
 {
 
+    // Whitelist with locals
+    protected $arrLocals = array(
+        'en_US' => 1,
+        'de_DE' => 1,
+        'de_CH' => 1,
+        'fr_CH' => 1
+    );
+    // default locale
+    protected $strDefaultLocale = 'de_DE';
+
     /**
      * Returns user by username and password
      *
@@ -40,78 +50,70 @@ trait UserModel
         return $arrReturn;
     }
 
-    public function getUserById($strId)
+    /**
+     * Returns user by user id
+     *
+     * @param int $numId
+     * @return array
+     */
+    public function getUserById($numId)
     {
         $arrReturn = array();
 
         $db = $this->getDb();
         $strSql = 'SELECT * FROM user WHERE id = {id};';
         $arrFields = array();
-        $arrFields['id'] = $strId;
+        $arrFields['id'] = $numId;
         $strSql = $db->prepare($strSql, $arrFields);
         $arrReturn = $db->queryRow($strSql);
 
         return $arrReturn;
     }
 
+    /**
+     * Login user with username and password
+     *
+     * @param array $arrParams
+     * @return bool
+     */
     public function login($arrParams = array())
     {
-        $arrReturn = array();
-        $arrReturn['status'] = 0;
-        $arrReturn['text'] = '';
-
+        $boolReturn = false;
         $strUsername = $arrParams['username'];
         $strPassword = $arrParams['password'];
 
         // check username and password
         $arrUser = $this->getUserByLogin($strUsername, $strPassword);
 
-        // $arrUser = array(
-        //    'id' => 1,
-        //    'acl' => 'admin',
-        //    'locale' => 'de_DE'
-        //);
-        //App::log('debug', $arrUser);
-
         if (empty($arrUser)) {
-            return $arrReturn;
+            return false;
         }
 
         // login ok
-        $arrReturn['status'] = 1;
+        $boolReturn = true;
 
         // create new session id
         $sess = App::getSession();
         $sess->regenerate();
 
         // store user settings in session
-        $this->setUser($arrUser);
+        $this->set('user.id', $arrUser['id']);
+        $this->set('user.role', $arrUser['role']);
+        $this->setLocale($arrUser['locale']);
 
-        // load permissions
-        $arrAcl = array();
-        $arrAclValues = explode("\n", $arrUser['acl']);
-
-        if (!empty($arrAclValues)) {
-            foreach ($arrAclValues as $strValue) {
-                if (!empty($strValue)) {
-                    $arrAcl[$strValue] = 1;
-                }
-            }
-        }
-        $this->setAcl($arrAcl);
-
-        // set locale
-        if (isset($arrUser['locale'])) {
-            $sess->set('locale', $arrUser['locale']);
-        }
-
-        return $arrReturn;
+        return $boolReturn;
     }
 
+    /**
+     * Logout user session
+     *
+     * @return void
+     */
     public function logout()
     {
-        $this->setUser(null);
-        $this->setAcl(null);
+        $this->set('user.id', null);
+        $this->set('user.role', null);
+        $this->set('user.locale', null);
         App::getSession()->destroy();
     }
 
@@ -172,6 +174,7 @@ trait UserModel
 
     /**
      * Generate Hash-Token from string
+     *
      * @param string $strValue
      * @param string $strSecret
      * @return string
@@ -188,120 +191,83 @@ trait UserModel
     }
 
     /**
-     * Get current user information
-     * @param string $strKey
-     * @return mixed
-     */
-    public function getUser()
-    {
-        $mixReturn = App::getSession()->get('user');
-        return $mixReturn;
-    }
-
-    /**
-     * Set user
+     * Set user info
+     *
      * @param array $arrUser
      */
-    public function setUser($arrUser)
+    public function set($strKey, $mixValue)
     {
-        App::getSession()->set('user', $arrUser);
+        App::getSession()->set($strKey, $mixValue);
     }
 
     /**
      * Get current user information
+     *
      * @param string $strKey
      * @return mixed
      */
-    public function getUserInfo($strKey, $mixDefault = '')
+    public function get($strKey, $mixDefault = '')
     {
-        $arrUser = App::getSession()->get('user');
-        $mixReturn = isset($arrUser[$strKey]) ? $arrUser[$strKey] : $mixDefault;
+        $mixReturn = App::getSession()->get($strKey, $mixDefault);
         return $mixReturn;
-    }
-
-    /**
-     * Set user info
-     * @param string $strKey
-     * @param type $mixValue
-     */
-    public function setUserInfo($strKey, $mixValue)
-    {
-        $arrUser = $this->getUser();
-        $arrUser[$strKey] = $mixValue;
-        $this->setUser($arrUser);
-    }
-
-    /**
-     * Return all user permissions
-     * @return string
-     */
-    public function getAcl()
-    {
-        $arrReturn = App::getSession()->get('acl');
-        return $arrReturn;
     }
 
     /**
      * Check user permission
-     * @param string $strAcl
+     *
+     * @param string|array $mixRole (e.g. 'ROLE_ADMIN' or 'ROLE_USER')
+     * or array('ROLE_ADMIN', 'ROLE_USER')
      * @return boolean
      */
-    public function acl($strAcl)
+    public function is($mixRole)
     {
-        $arrAcl = $this->getAcl();
-        $boolReturn = isset($arrAcl['admin']) || isset($arrAcl[$strAcl]);
-        return $boolReturn;
+        // current user role
+        $strUserRole = $this->get('user.role');
+
+        // full access for admin
+        if ($strUserRole === 'ROLE_ADMIN') {
+            return true;
+        }
+        if ($mixRole === $strUserRole) {
+            return true;
+        }
+        if (is_array($mixRole) && in_array($strUserRole, $mixRole)) {
+            return true;
+        }
+        return false;
     }
 
     /**
-     * Set user permissions (accesskeys)
-     * @param array $arrAcl
-     */
-    public function setAcl($arrAcl)
-    {
-        App::getSession()->set('acl', $arrAcl);
-    }
-
-    /**
-     * Returns true if user is logged in
+     * Check if user is authenticated (logged in)
      *
      * @return boolean
      */
     public function isAuth()
     {
-        $numId = $this->getUserInfo('id');
+        $numId = $this->get('user.id');
         $boolStatus = !empty($numId);
         return $boolStatus;
     }
 
     /**
-     * Set locale into session
+     * Change user session locale
      *
      * @param string $strLocale e.g. de_DE
      * @param string $strDomain default = text_
      * @return bool
-     * @todo Add $arrWhitelist to function
      */
     public function setLocale($strLocale, $strDomain = 'text_')
     {
-        $session = App::getSession();
-
         if ($strLocale === 'auto') {
-            $strSessionLocale = $session->get('locale');
+            $strSessionLocale = $this->get('user.locale');
             if (!empty($strSessionLocale)) {
                 $strLocale = $strSessionLocale;
             }
         }
 
-        $arrWhitelist = array();
-        $arrWhitelist['de_DE'] = 1;
-        $arrWhitelist['de_CH'] = 1;
-        $arrWhitelist['fr_CH'] = 1;
-        $arrWhitelist['it_CH'] = 1;
-        $arrWhitelist['en_US'] = 1;
-
-        if (!isset($arrWhitelist[$strLocale])) {
-            $strLocale = 'de_DE';
+        // check whitelist
+        if (!isset($this->arrLocals[$strLocale])) {
+            $strLocale = $this->strDefaultLocale;
         }
 
         // select locale handler class
@@ -309,12 +275,12 @@ trait UserModel
 
         // change gettext locale
         $boolReturn = $translation->setLocale($strLocale, $strDomain);
-
+        //$strTest = __('en');
         // store into session
-        $session->set('locale', $strLocale);
+        $this->set('user.locale', $strLocale);
 
         // set user language
-        $this->setUserInfo('language', $translation->getLanguage());
+        $this->set('user.language', $translation->getLanguage());
 
         return $boolReturn;
     }
