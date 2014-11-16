@@ -216,6 +216,20 @@ class SmartUrl
     }
 
     /**
+     * Add xdebugger rule
+     */
+    public function addXdebugRule()
+    {
+        // xdebug start
+        $this->on('get,post', '^/\?XDEBUG_SESSION_START=netbeans-xdebug$', function () {
+            $this->callController(array(
+                'controller' => 'index',
+                'action' => 'index'
+            ));
+        });
+    }
+
+    /**
      * Add assets url rules
      */
     public function addAssetRule()
