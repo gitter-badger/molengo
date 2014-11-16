@@ -250,7 +250,7 @@ class SmartUrl
     public function addControllerRule()
     {
         // controller/action
-        $this->on('get,post', '^/(?<controller>\w+)\/?(?<action>\w+)?\?{0,1}', function ($arrParams) {
+        $this->on('get,post', '^/(?<controller>[\w\-]+)\/?(?<action>\w+)?\?{0,1}', function ($arrParams) {
             $this->callController($arrParams);
         });
     }
@@ -267,7 +267,7 @@ class SmartUrl
         } else {
             $strController = $arrParams['controller'];
         }
-        $strController = str_replace('_', ' ', strtolower($strController));
+        $strController = str_replace(array('_', '-'), ' ', strtolower($strController));
         $strController = ucwords(strtolower($strController));
         $strController = str_replace(' ', '', $strController);
         $strController = '\\Controller\\' . $strController . 'Controller';
