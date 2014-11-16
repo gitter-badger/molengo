@@ -34,7 +34,8 @@ class TranslationMoFile extends TranslationBase
 
     /**
      * Set Application Locale
-     * @param string $strLocale de_DE | fr_FR | it_IT | en_US
+     * 
+     * @param string $strLocale (e.g. de_DE, fr_FR, it_IT, en_US)
      * @param string $strDomain default = text_
      * @return boolean
      */
@@ -56,14 +57,16 @@ class TranslationMoFile extends TranslationBase
         $strCodeset = 'UTF-8';
 
         // mo filename
-        // load text from file ./locale/en_US/LC_MESSAGES/text_de_CH.mo
         $strMoFile = $strDir . '/' . $strLocale . '/LC_MESSAGES/' . $strTextDomain . '.mo';
 
+        $this->mo = null;
         if (file_exists($strMoFile)) {
             // load mo file
             $mo = new MoFileReader();
             $boolReturn = $mo->load($strMoFile);
             $this->mo = $mo;
+        } else {
+            logmsg('warning', 'File not found: ' . $strMoFile);
         }
 
         // save configuration
@@ -90,7 +93,9 @@ class TranslationMoFile extends TranslationBase
         }
 
         // translate
-        $strMessage = $this->mo->translate($strMessage);
+        if ($this->mo !== null) {
+            $strMessage = $this->mo->translate($strMessage);
+        }
 
         // placeholder
         if (!empty($arrReplace)) {

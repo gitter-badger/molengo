@@ -29,83 +29,96 @@ namespace Molengo;
 /**
  * WebApp (Service Locator)
  *
- * @version: 2014.10.01
+ * @version: 14.11.16.0
  */
 class WebApp
 {
 
     /**
      * Configuration
+     *
      * @var array
      */
     protected static $config = array();
 
     /**
      * Database
+     *
      * @var DbMySql
      */
     protected static $db = null;
 
     /**
      * Template
+     *
      * @var HtmlTemplate
      */
     protected static $tpl = null;
 
     /**
      * Url router
+     *
      * @var SmartUrl
      */
     protected static $router = null;
 
     /**
      * Session
+     *
      * @var Session
      */
     protected static $session = null;
 
     /**
      * Request
+     *
      * @var Request
      */
     protected static $request = null;
 
     /**
      * Response
+     *
      * @var Response
      */
     protected static $response = null;
 
     /**
      * Cache
+     *
      * @var CacheFile
      */
     protected static $cache = null;
 
     /**
      * Text
-     * @var TranslationMoFile
+     *
+     * @var TranslationBase
      */
     protected static $translation = null;
 
     /**
      * User
+     *
      * @var CacheFile
      */
     protected static $user = null;
 
     /**
      * Init configuration
-     * @return boolean
+     *
+     * @return void
      * @throws Exception
      */
     public static function init()
     {
-
+        return true;
     }
 
     /**
      * Init all objects
+     *
+     * @return void
      */
     protected static function initAll()
     {
@@ -130,14 +143,18 @@ class WebApp
 
     /**
      * Start application
+     *
+     * @return void
      */
     public static function run()
     {
-
+        static::getRouter()->run();
     }
 
     /**
      * Close app
+     *
+     * @return void
      */
     public static function close()
     {
@@ -145,7 +162,8 @@ class WebApp
     }
 
     /**
-     * Return session object (singleton)
+     * Return session object
+     *
      * @return Session
      */
     public static function getSession()
@@ -158,6 +176,8 @@ class WebApp
 
     /**
      * Init Session
+     *
+     * @return void
      */
     protected static function initSession()
     {
@@ -166,6 +186,11 @@ class WebApp
         $session->start(static::get('session.name'));
     }
 
+    /**
+     * Init user session
+     *
+     * @return void
+     */
     public static function initUser()
     {
         $user = static::getUser();
@@ -174,7 +199,7 @@ class WebApp
     }
 
     /**
-     * Return user object (singleton)
+     * Return user object
      *
      * @return \Model\UserModel
      */
@@ -187,20 +212,28 @@ class WebApp
     }
 
     /**
-     * Return translation object (singleton)
+     * Return translation object
      *
      * @return TranslationGettext
      */
     public static function getTranslation()
     {
         if (static::$translation === null) {
-            static::$translation = new TranslationGettext();
+            // since php 5.5.x gettext under windows is not working (#66265)
+            $boolWin = strtolower(substr(PHP_OS, 0, 3)) === 'win';
+            $boolVersion = version_compare(PHP_VERSION, '5.5.0', '>=');
+            if ($boolWin && $boolVersion) {
+                static::$translation = new TranslationMoFile();
+            } else {
+                static::$translation = new TranslationGettext();
+            }
         }
         return static::$translation;
     }
 
     /**
-     * Return html template object (singleton)
+     * Return html template object
+     *
      * @return HtmlTemplate
      */
     public static function getTemplate()
@@ -213,6 +246,8 @@ class WebApp
 
     /**
      * Init HTML Template
+     *
+     * @return void
      */
     protected static function initTemplate()
     {
@@ -226,7 +261,8 @@ class WebApp
 
     /**
      * CacheFile
-     * @return object
+     *
+     * @return CacheFile
      */
     public static function getCache()
     {
@@ -236,6 +272,11 @@ class WebApp
         return static::$cache;
     }
 
+    /**
+     * Init cache
+     *
+     * @return void
+     */
     protected static function initCache()
     {
         $cache = static::getCache();
@@ -245,7 +286,8 @@ class WebApp
     }
 
     /**
-     * Return router object (singleton)
+     * Return router object
+     *
      * @return SmartUrl
      */
     public static function getRouter()
@@ -258,14 +300,23 @@ class WebApp
 
     /**
      * Init Router and define url mappings
+     *
+     * @return void
      */
     protected static function initRouter()
     {
-
+        $router = static::getRouter();
+        $router->addIndexRule();
+        if (G_DEBUG) {
+            $router->addXdebugRule();
+        }
+        $router->addAssetRule();
+        $router->addControllerRule();
     }
 
     /**
-     * Return request object (singleton)
+     * Return request object
+     *
      * @return Request
      */
     public static function getRequest()
@@ -277,7 +328,8 @@ class WebApp
     }
 
     /**
-     * Return Response object (singleton)
+     * Return Response object
+     *
      * @return Response
      */
     public static function getResponse()
@@ -336,7 +388,8 @@ class WebApp
     }
 
     /**
-     * Return database object (singleton)
+     * Return database object
+     *
      * @return DbMySql
      * @throws Exception
      */
@@ -354,8 +407,10 @@ class WebApp
 
     /**
      * Set config
+     *
      * @param string $strKey
      * @param mixed $mixValue
+     * @return void
      */
     public static function set($strKey, $mixValue)
     {
@@ -364,6 +419,7 @@ class WebApp
 
     /**
      * Get config
+     *
      * @param string $strKey
      * @param mixed $mixDefault
      * @return mixed
@@ -377,6 +433,11 @@ class WebApp
         }
     }
 
+    /**
+     * Init error handler
+     *
+     * @return void
+     */
     protected static function initErrorHandling()
     {
         // error reporting
@@ -398,6 +459,7 @@ class WebApp
     /**
      * Exception handler for exceptions which are not within a
      * try / catch block. Terminates the current script.
+     *
      * @param ErrorException $error
      * @return boolean
      */
@@ -427,19 +489,22 @@ class WebApp
     /**
      * Handler for Fatal errors
      * e.g. Maximum execution time of x second exceeded
+     *
+     * @return void
      */
     public static function handleShutdown()
     {
         $arrError = error_get_last();
-        if (!empty($arrError)) {
-            $numType = $arrError['type'];
-            if ($numType & error_reporting()) {
-                $strMessage = 'Shutdown Error: ' . error_type_text($numType) . ' ' . $arrError['message'];
-                $strFile = $arrError['file'];
-                $numLine = $arrError['line'];
-                $error = new \ErrorException($strMessage, $numType, 0, $strFile, $numLine);
-                static::handleErrorException($error);
-            }
+        if (empty($arrError)) {
+            return;
+        }
+        $numType = $arrError['type'];
+        if ($numType & error_reporting()) {
+            $strMessage = 'Shutdown Error: ' . error_type_text($numType) . ' ' . $arrError['message'];
+            $strFile = $arrError['file'];
+            $numLine = $arrError['line'];
+            $error = new \ErrorException($strMessage, $numType, 0, $strFile, $numLine);
+            static::handleErrorException($error);
         }
     }
 
