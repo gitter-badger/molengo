@@ -34,7 +34,7 @@ class TranslationMoFile extends TranslationBase
 
     /**
      * Set Application Locale
-     * 
+     *
      * @param string $strLocale (e.g. de_DE, fr_FR, it_IT, en_US)
      * @param string $strDomain default = text_
      * @return boolean
@@ -65,8 +65,6 @@ class TranslationMoFile extends TranslationBase
             $mo = new MoFileReader();
             $boolReturn = $mo->load($strMoFile);
             $this->mo = $mo;
-        } else {
-            logmsg('warning', 'File not found: ' . $strMoFile);
         }
 
         // save configuration
