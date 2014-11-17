@@ -52,10 +52,10 @@ class TranslationGettext extends TranslationBase
         $mixStatus = setlocale(LC_ALL, $strLocale);
 
         // folder for translation files
-        if (defined('G_ROOT_DIR')) {
-            $strDir = G_ROOT_DIR . '/locale';
+        if (defined('G_APP_DIR')) {
+            $strDir = G_APP_DIR . '/Locale';
         } else {
-            throw new \Exception('G_ROOT_DIR is not defined');
+            throw new \Exception('G_APP_DIR is not defined');
         }
         bindtextdomain($strTextDomain, $strDir);
 
@@ -115,4 +115,5 @@ class TranslationGettext extends TranslationBase
 
         return $strMessage;
     }
+
 }
