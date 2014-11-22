@@ -17,18 +17,10 @@
         "phpmailer/phpmailer": "5.2.*",
         "werkint/jsmin": "1.0.*"
     },
-    "require-dev": {
-        "phpunit/phpunit": "4.2.*"
-    },
     "autoload": {
         "psr-0": {
             "Molengo": "src"
         },
         "files": ["src/Molengo/util.php"]
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.0.x-dev"
-        }
     }
 }
