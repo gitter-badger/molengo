@@ -114,7 +114,7 @@ class TestSuite
         // coverage
         if ($this->boolCoverage == true) {
             if (file_exists($this->strCoverageDir)) {
-                $fs->rrmdir($this->strCoverageDir);
+                $fs->rmdir($this->strCoverageDir);
             }
             mkdir($this->strCoverageDir);
             $coverage = new \PHP_CodeCoverage();
@@ -285,5 +285,4 @@ class TestSuite
         extract($arrVars, EXTR_REFS);
         require $this->strTemplate;
     }
-
 }
