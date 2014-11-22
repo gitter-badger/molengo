@@ -29,7 +29,7 @@ namespace Molengo;
 /**
  * Request represents an HTTP request
  *
- * @version 2014.06.01
+ * @version 14.11.22
  */
 class Request
 {
@@ -327,9 +327,9 @@ class Request
             $strUrl = "http://";
         }
         if ($_SERVER["SERVER_PORT"] != "80") {
-            $strUrl .= $_SERVER["SERVER_NAME"] . ":" . $_SERVER["SERVER_PORT"];
+            $strUrl .= $_SERVER["HTTP_HOST"] . ":" . $_SERVER["SERVER_PORT"];
         } else {
-            $strUrl .= $_SERVER["SERVER_NAME"];
+            $strUrl .= $_SERVER["HTTP_HOST"];
         }
         return $strUrl;
     }
