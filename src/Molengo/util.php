@@ -25,7 +25,7 @@
  */
 /**
  * Utils (only functions)
- * Version: 2014.08.28
+ * Version: 14.11.25.0
  */
 
 /**
@@ -143,19 +143,16 @@ function wa($str)
  * Return Array element value (get value)
  *
  * @param array $arr
- * @param mixed $mix_key
- * @param mixed $mix_default
+ * @param string $strKey
+ * @param mixed $mixDefault
  * @return mixed
  */
-function gv(&$arr, $mix_key, $mix_default = '')
+function gv(&$arr, $strKey, $mixDefault = '')
 {
-    if (is_array($mix_key)) {
-        return av($arr, $mix_key, $mix_default);
+    if (!isset($arr[$strKey])) {
+        return $mixDefault;
     }
-    if (!isset($arr[$mix_key])) {
-        return $mix_default;
-    }
-    return $arr[$mix_key];
+    return $arr[$strKey];
 }
 
 /**
