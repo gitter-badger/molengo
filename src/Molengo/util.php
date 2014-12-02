@@ -390,31 +390,30 @@ function now()
 }
 
 /**
- * Converts any date/time format (default is d.m.Y)
+ * Converts any date/time format.
+ * Support for dates <= 1901.
  *
- * @param string $str_time
- * @param string $str_format
- * @param mixed $mix_default
- * @return string or $mix_default
+ * @param string $strTime
+ * @param string $strFormat (default is d.m.Y)
+ * @param mixed $mixDefault
+ * @return string or $mixDefault
  *
  * <code>
- * echo format_time('2011-03-28 15:14:30') -> '28.03.1982'
- * echo format_time('2011-03-28 15:10:5', 'd.m.Y H:i:s') -> '28.03.1982 15:10:05'
- * echo format_time('2011-3-22 23:01:45', 'H:i:s') -> '23:01:45'
- * echo format_time('2014-14-31', 'H:i:s', 'not valid') -> 'not valid'
+ * echo format_time('2011-03-28 15:14:30'); // '28.03.1982'
+ * echo format_time('2011-03-28 15:10:5', 'd.m.Y H:i:s'); // '28.03.1982 15:10:05'
+ * echo format_time('1900-3-22 23:01:45', 'H:i:s'); // '23:01:45'
+ * echo format_time('2014-14-31', 'H:i:s', 'not valid'); // 'not valid'
  * </code>
  */
-function format_time($str_time, $str_format = 'd.m.Y', $mix_default = '')
+function format_time($strTime, $strFormat = 'd.m.Y', $mixDefault = '')
 {
-    if (empty($str_time) || $str_time === '0000-00-00 00:00:00' || $str_time === '0000-00-00') {
-        return $mix_default;
+    try {
+        $date = new DateTime($strTime);
+    } catch (Exception $ex) {
+        return $mixDefault;
     }
-    $num_time = strtotime($str_time);
-    if ($num_time === false) {
-        return $mix_default;
-    }
-    $str_return = date($str_format, $num_time);
-    return $str_return;
+    $strReturn = $date->format($strFormat);
+    return $strReturn;
 }
 
 /**
