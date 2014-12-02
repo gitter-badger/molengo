@@ -407,6 +407,9 @@ function now()
  */
 function format_time($strTime, $strFormat = 'd.m.Y', $mixDefault = '')
 {
+    if (empty($strTime)) {
+        return $mixDefault;
+    }
     try {
         $date = new DateTime($strTime);
     } catch (Exception $ex) {
