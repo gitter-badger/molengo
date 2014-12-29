@@ -48,7 +48,7 @@ class TranslationMoFile extends TranslationBase
 
         // folder for translation files
         if (defined('G_ROOT_DIR')) {
-            $strDir = G_ROOT_DIR . '/locale';
+            $strDir = G_APP_DIR . '/Locale';
         } else {
             throw new \Exception('G_ROOT_DIR is not defined');
         }
