@@ -24,15 +24,14 @@
  * THE SOFTWARE.
  */
 
-namespace Molengo;
+namespace Molengo\Controller;
 
 /**
  * JSON-RPC 2.0 server implementation
  * http://www.jsonrpc.org/specification
  *
- * @version 14.11.10
  */
-class JsonRpcServer extends \Molengo\Object
+class JsonRpcController extends \Molengo\Controller\BaseController
 {
 
     protected $controller;
@@ -82,6 +81,12 @@ class JsonRpcServer extends \Molengo\Object
             $arrResult = array();
 
             $strRequestMethod = $arrRequest['method'];
+
+            // check if method is public
+            $method = new \ReflectionMethod($this->controller, $strRequestMethod);
+            if (!$method->isPublic()) {
+                throw new \Exception("Action '$strRequestMethod' is not public");
+            }
 
             // call function
             if (isset($arrRequest['params'])) {
@@ -209,4 +214,5 @@ class JsonRpcServer extends \Molengo\Object
 
         logmsg('error_rpc', $strError);
     }
+
 }

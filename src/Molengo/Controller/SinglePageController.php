@@ -24,17 +24,18 @@
  * THE SOFTWARE.
  */
 
-namespace Molengo;
+namespace Molengo\Controller;
 
 use App;
 
-class SinglePage extends \Molengo\Object
+class SinglePageController extends \Molengo\Controller\BaseController
 {
 
     protected $cache;
 
     public function __construct()
     {
+        parent::__construct();
         $this->cache = App::getCache();
     }
 
@@ -193,4 +194,5 @@ class SinglePage extends \Molengo\Object
         // print content
         echo $strContent;
     }
+
 }

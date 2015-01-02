@@ -28,8 +28,10 @@ namespace Molengo\Controller;
 
 use App;
 
-class BaseController extends \Molengo\Object
+class BaseController
 {
+
+    protected $arrEvent = array();
 
     public function __construct()
     {
@@ -37,11 +39,76 @@ class BaseController extends \Molengo\Object
     }
 
     /**
+     * Register event callback
+     *
+     * @param type $strEvent
+     * @param type $callback
+     */
+    protected function on($strEvent, $callback)
+    {
+        $this->arrEvents[$strEvent][] = $callback;
+    }
+
+    /**
+     * Trigger event
+     *
+     * @param string $strEvent
+     * @param array $arrParams
+     * @return boolean
+     */
+    protected function trigger($strEvent, array $arrParams = null)
+    {
+        $boolReturn = false;
+        if (!empty($this->arrEvents[$strEvent])) {
+            foreach ($this->arrEvents[$strEvent] as $event) {
+                $boolReturn = $event[0]->$event[1]($arrParams);
+                if ($boolReturn === false) {
+                    return false;
+                }
+            }
+        }
+        return $boolReturn;
+    }
+
+    /**
+     * Call a PHP class function with optional parameters and return result
+     *
+     * @param object $controller
+     * @param string $strAction e.g. ClassName.echo
+     * @param array $arrParams parameter for function
+     * @return mixed return value from function
+     * @throws \Exception
+     */
+    protected function call($controller, $strAction, $arrParams = null)
+    {
+        $arrResult = null;
+        //$strMethod = substr(strrchr($strAction, "."), 1);
+        // check if function exist
+        $class = new \ReflectionClass($controller);
+        if (!$class->hasMethod($strAction)) {
+            throw new \Exception("Action '$strAction' not found");
+        }
+
+        $arrCallbackParams = array('method' => $strAction);
+        if (!$this->trigger('beforeCall', $arrCallbackParams)) {
+            throw new Exception('Permission denied', 403);
+        }
+
+        // call function
+        if ($arrParams === null) {
+            $arrResult = $controller->{$strAction}();
+        } else {
+            $arrResult = $controller->{$strAction}($arrParams);
+        }
+        return $arrResult;
+    }
+
+    /**
      * Init Layout. Load global template variables
      */
     protected function initLayout()
     {
-
+        
     }
 
     /**
@@ -94,7 +161,7 @@ class BaseController extends \Molengo\Object
      */
     public function rpc()
     {
-        $rpc = new \Molengo\JsonRpcServer();
+        $rpc = new \Molengo\Controller\JsonRpcController();
         $rpc->setController($this);
         $rpc->on('beforeCall', array($this, 'beforeCall'));
         return $rpc->run();
@@ -119,7 +186,7 @@ class BaseController extends \Molengo\Object
      */
     public function getPageContent($arrParams)
     {
-        $sp = new \Molengo\SinglePage();
+        $sp = new \Molengo\Controller\SinglePageController();
         $sp->on('beforeCall', array($this, 'beforeCall'));
         $arrReturn = $sp->getPageContent($this, $arrParams);
         return $arrReturn;
@@ -133,12 +200,7 @@ class BaseController extends \Molengo\Object
      */
     public function sendFileContent($arrParams)
     {
-        // check user login
-        if (!App::getUser()->isAuth()) {
-            exit;
-        }
-
-        $sp = new \Molengo\SinglePage();
+        $sp = new \Molengo\Controller\SinglePageController();
         $sp->on('beforeCall', array($this, 'beforeCall'));
         $sp->sendFileContent($this, $arrParams);
     }
@@ -152,4 +214,5 @@ class BaseController extends \Molengo\Object
     {
         return array();
     }
+
 }
