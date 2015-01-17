@@ -29,6 +29,21 @@ namespace Molengo\Model;
 class BaseModel
 {
 
+    /** @var \Molengo\Request HTTP request */
+    public $request;
+
+    /** @var \Molengo\Response HTTP response */
+    public $response;
+
+    /** @var \Molengo\Session HTTP session  */
+    public $session;
+
+    /** @var \Molengo\HtmlTemplate View template */
+    public $view;
+
+    /** @var \Molengo\Model\UserModel */
+    public $user;
+
     /** @var DbMySql */
     protected $db = null;
 
@@ -39,6 +54,11 @@ class BaseModel
      */
     public function __construct(&$db = null)
     {
+        $this->request = \App::getRequest();
+        $this->response = \App::getResponse();
+        $this->session = \App::getSession();
+        $this->view = \App::getView();
+
         if ($db === null) {
             // default connection
             $this->db = \App::getDb();
@@ -56,4 +76,5 @@ class BaseModel
     {
         return $this->db;
     }
+
 }

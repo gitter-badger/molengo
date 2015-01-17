@@ -86,7 +86,7 @@ trait CrudModel
         $db = $this->getDb();
 
         $arrRow['created_at'] = now();
-        $arrRow['created_user_id'] = $this->getUserInfo('user_id');
+        $arrRow['created_user_id'] = $this->user->get('user.id');
 
         $boolReturn = $db->insertRow($this->strTable, $arrRow);
 
@@ -108,7 +108,7 @@ trait CrudModel
         $db = $this->getDb();
 
         $arrRow['updated_at'] = now();
-        $arrRow['updated_user_id'] = $this->getUserInfo('user_id');
+        $arrRow['updated_user_id'] = $this->user->get('user.id');
 
         $arrWhere = array(
             'id' => $arrRow['id'],
@@ -132,7 +132,7 @@ trait CrudModel
         $arrRow = array(
             'deleted' => 1,
             'deleted_at' => now(),
-            'deleted_user_id' => $this->getUserInfo('user_id')
+            'deleted_user_id' => $this->user->get('user.id')
         );
 
         $arrWhere = array(
@@ -143,4 +143,5 @@ trait CrudModel
         $boolReturn = $db->updateRow($this->strTable, $arrWhere, $arrRow);
         return $boolReturn;
     }
+
 }

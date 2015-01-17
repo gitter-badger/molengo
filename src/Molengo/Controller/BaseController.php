@@ -31,10 +31,35 @@ use App;
 class BaseController
 {
 
+    /** @var \Molengo\Request HTTP request */
+    public $request;
+
+    /** @var \Molengo\Response HTTP response */
+    public $response;
+
+    /** @var \Molengo\Session HTTP session  */
+    public $session;
+
+    /** @var \Molengo\HtmlTemplate View template */
+    public $view;
+
+    /** @var \Molengo\Model\UserModel */
+    public $user;
+
+    /** @var array Events */
     protected $arrEvent = array();
+
+    /** @var bool */
+    protected $boolAuth = true;
 
     public function __construct()
     {
+        $this->request = \App::getRequest();
+        $this->response = \App::getResponse();
+        $this->session = \App::getSession();
+        $this->view = \App::getView();
+        $this->user = \App::getUser();
+
         $this->initLayout();
     }
 
@@ -108,7 +133,7 @@ class BaseController
      */
     protected function initLayout()
     {
-        
+
     }
 
     /**

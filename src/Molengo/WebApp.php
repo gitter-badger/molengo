@@ -49,11 +49,11 @@ class WebApp
     protected static $db = null;
 
     /**
-     * Template
+     * View template
      *
      * @var HtmlTemplate
      */
-    protected static $tpl = null;
+    protected static $view = null;
 
     /**
      * Url router
@@ -110,9 +110,9 @@ class WebApp
      * @return void
      * @throws Exception
      */
-    public static function init()
+    protected static function config()
     {
-        return true;
+
     }
 
     /**
@@ -120,8 +120,11 @@ class WebApp
      *
      * @return void
      */
-    protected static function initAll()
+    public static function init()
     {
+        // load config
+        static::config();
+
         // error reporting and handler
         static::initErrorHandling();
 
@@ -137,8 +140,8 @@ class WebApp
         // url mapping
         static::initRouter();
 
-        // html templates
-        static::initTemplate();
+        // view templates
+        static::initView();
     }
 
     /**
@@ -236,12 +239,12 @@ class WebApp
      *
      * @return HtmlTemplate
      */
-    public static function getTemplate()
+    public static function getView()
     {
-        if (static::$tpl === null) {
-            static::$tpl = new HtmlTemplate();
+        if (static::$view === null) {
+            static::$view = new HtmlTemplate();
         }
-        return static::$tpl;
+        return static::$view;
     }
 
     /**
@@ -249,14 +252,14 @@ class WebApp
      *
      * @return void
      */
-    protected static function initTemplate()
+    protected static function initView()
     {
-        $tpl = static::getTemplate();
-        $tpl->setTemplateDir(G_VIEW_DIR);
+        $view = static::getView();
+        $view->setTemplateDir(G_VIEW_DIR);
 
         // cache
         $cache = static::getCache();
-        $tpl->setCache($cache);
+        $view->setCache($cache);
     }
 
     /**
@@ -533,4 +536,5 @@ class WebApp
             echo $strError;
         }
     }
+
 }

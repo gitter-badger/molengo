@@ -284,4 +284,5 @@ trait UserModel
 
         return $boolReturn;
     }
+
 }
