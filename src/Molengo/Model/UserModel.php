@@ -93,8 +93,7 @@ trait UserModel
         $boolReturn = true;
 
         // create new session id
-        $sess = App::getSession();
-        $sess->regenerate();
+        $this->session->regenerate();
 
         // store user settings in session
         $this->set('user.id', $arrUser['id']);
@@ -114,7 +113,7 @@ trait UserModel
         $this->set('user.id', null);
         $this->set('user.role', null);
         $this->set('user.locale', null);
-        App::getSession()->destroy();
+        $this->session->destroy();
     }
 
     /**
@@ -185,7 +184,7 @@ trait UserModel
             $strSecret = App::get('app.secret');
         }
         // create real key for value
-        $strSessionId = App::getSession()->getId();
+        $strSessionId = $this->session->getId();
         $strTrueHash = sha1($strValue . $strSessionId . $strSecret);
         return $strTrueHash;
     }
@@ -197,7 +196,7 @@ trait UserModel
      */
     public function set($strKey, $mixValue)
     {
-        App::getSession()->set($strKey, $mixValue);
+        $this->session->set($strKey, $mixValue);
     }
 
     /**
@@ -208,7 +207,7 @@ trait UserModel
      */
     public function get($strKey, $mixDefault = '')
     {
-        $mixReturn = App::getSession()->get($strKey, $mixDefault);
+        $mixReturn = $this->session->get($strKey, $mixDefault);
         return $mixReturn;
     }
 

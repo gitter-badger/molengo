@@ -137,39 +137,6 @@ class BaseController
     }
 
     /**
-     * Request
-     *
-     * @return \Molengo\Request HTTP Request
-     */
-    protected function request()
-    {
-        return App::getRequest();
-    }
-
-    /**
-     *
-     * @return \Molengo\Response HTTP Request
-     */
-    protected function response()
-    {
-        return App::getResponse();
-    }
-
-    /**
-     * Return html template object (singleton)
-     * @return HtmlTemplate
-     */
-    protected function template()
-    {
-        return App::getTemplate();
-    }
-
-    protected function session()
-    {
-        return App::getSession();
-    }
-
-    /**
      * Returns page assets (js, css)
      *
      * @return array

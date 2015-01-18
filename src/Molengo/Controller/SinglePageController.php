@@ -75,7 +75,6 @@ class SinglePageController extends \Molengo\Controller\BaseController
     public function getPageContent($controller, $arrParams)
     {
         $arrReturn = array();
-        $cache = App::getCache();
         $strPage = $arrParams['page'];
 
         $strHtml = '';
@@ -112,7 +111,7 @@ class SinglePageController extends \Molengo\Controller\BaseController
                     $arrEl[] = array(
                         'tag' => 'style',
                         'prob' => array(
-                            'innerHTML' => $cache->getFileContent($strFile)
+                            'innerHTML' => $this->cache->getFileContent($strFile)
                         ),
                         'attr' => array(
                             'data-page' => 1,
@@ -136,7 +135,7 @@ class SinglePageController extends \Molengo\Controller\BaseController
                     $arrEl[] = array(
                         'tag' => 'script',
                         'prob' => array(
-                            'innerHTML' => $cache->getFileContent($strFile)
+                            'innerHTML' => $this->cache->getFileContent($strFile)
                         ),
                         'attr' => array(
                             'type' => "text/javascript",
@@ -146,7 +145,7 @@ class SinglePageController extends \Molengo\Controller\BaseController
                 }
             } else {
                 // html
-                $strHtml .= $cache->getFileContent($strFile);
+                $strHtml .= $this->cache->getFileContent($strFile);
             }
         }
 
@@ -157,26 +156,24 @@ class SinglePageController extends \Molengo\Controller\BaseController
 
     public function sendFileContent($controller, $arrParams = array())
     {
-        $res = App::getResponse();
-        $cache = App::getCache();
         $strType = gv($arrParams, 'type');
         $strPage = gv($arrParams, 'page');
 
-        $res->setHeader('Content-Encoding: gzip');
+        $this->response->setHeader('Content-Encoding: gzip');
 
         if ($strType === 'js') {
-            $res->setHeader('Content-Type: text/javascript;charset=UTF-8');
+            $this->response->setHeader('Content-Type: text/javascript;charset=UTF-8');
         }
         if ($strType === 'css') {
-            $res->setHeader('Content-Type: text/css;charset=UTF-8');
+            $this->response->setHeader('Content-Type: text/css;charset=UTF-8');
         }
         // no caching
         // HTTP 1.1.
-        $res->setHeader('Cache-Control: no-cache, no-store, must-revalidate');
+        $this->response->setHeader('Cache-Control: no-cache, no-store, must-revalidate');
         // HTTP 1.0.
-        $res->setHeader('Pragma: no-cache');
+        $this->response->setHeader('Pragma: no-cache');
         // Proxies
-        $res->setHeader('Expires: 0');
+        $this->response->setHeader('Expires: 0');
 
         // get files from this page
         $arrFiles = $this->getFiles($controller, $strPage);
@@ -186,7 +183,7 @@ class SinglePageController extends \Molengo\Controller\BaseController
         if (!empty($arrFiles)) {
             foreach ($arrFiles as $strFile) {
                 if ($strType == file_extension($strFile)) {
-                    $strContent .= $cache->getFileContent($strFile);
+                    $strContent .= $this->cache->getFileContent($strFile);
                 }
             }
         }
