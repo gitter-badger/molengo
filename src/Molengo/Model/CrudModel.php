@@ -18,7 +18,7 @@ trait CrudModel
     /**
      * Constructor
      *
-     * @param type $db
+     * @param \Molengo\DbMySql $db
      * @throws Exception if tablename is not defined
      */
     public function __construct(&$db = null)
