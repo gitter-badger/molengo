@@ -70,7 +70,8 @@ class BaseModel
 
     /**
      * Returns database object
-     * @return DbMySql
+     * 
+     * @return \Molengo\DbMySql
      */
     public function getDb()
     {
