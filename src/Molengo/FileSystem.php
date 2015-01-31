@@ -81,9 +81,9 @@ class FileSystem
      *
      * @param string $strPattern
      * @param int $numFlags
-     * @return type
+     * @return array
      */
-    public function glob($strPattern, $numFlags = 0)
+    public function find($strPattern, $numFlags = 0)
     {
         $arrFiles = glob($strPattern, $numFlags);
         foreach (glob(dirname($strPattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
@@ -124,23 +124,23 @@ class FileSystem
     }
 
     /**
-     * Returns the filename
-     *
-     * @param string $strFilename
-     * @return string
-     */
-    public function filename($strFilename)
-    {
-        return pathinfo($strFilename, PATHINFO_FILENAME);
-    }
-
-    /**
      * Returns the basename
      *
      * @param string $strFilename
      * @return string
      */
     public function basename($strFilename)
+    {
+        return pathinfo($strFilename, PATHINFO_FILENAME);
+    }
+
+    /**
+     * Returns the filename
+     *
+     * @param string $strFilename
+     * @return string
+     */
+    public function filename($strFilename)
     {
         return pathinfo($strFilename, PATHINFO_BASENAME);
     }
