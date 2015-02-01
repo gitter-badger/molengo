@@ -59,8 +59,6 @@ class BaseController
         $this->session = \App::getSession();
         $this->view = \App::getView();
         $this->user = \App::getUser();
-
-        $this->initLayout();
     }
 
     /**
@@ -129,21 +127,38 @@ class BaseController
     }
 
     /**
-     * Init Layout. Load global template variables
-     */
-    protected function initLayout()
-    {
-
-    }
-
-    /**
      * Returns page assets (js, css)
      *
      * @return array
      */
-    protected function assets()
+    protected function getAssets()
     {
         return array();
+    }
+
+    /**
+     * Returns translated text
+     *
+     * @return array
+     */
+    protected function getTextAssets()
+    {
+        return array();
+    }
+
+    /**
+     * Set text to global layout
+     *
+     * @return void
+     */
+    protected function setTextAssets()
+    {
+        $arrText = $this->getTextAssets();
+        if (!empty($arrText)) {
+            $strJs = encode_json($arrText);
+            $strJs = sprintf("<script>\$d.addText(%s);</script>", $strJs);
+            $this->view->set('jstext', $strJs);
+        }
     }
 
     /**
