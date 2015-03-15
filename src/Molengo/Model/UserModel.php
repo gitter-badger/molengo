@@ -33,7 +33,7 @@ trait UserModel
         $strSql = 'SELECT *
             FROM user
             WHERE username={username}
-            AND enabled = 1
+            AND disabled = 0
             LIMIT 1;';
 
         $arrInput = array();
