@@ -396,7 +396,7 @@ function now()
  * @param string $strTime
  * @param string $strFormat (default is d.m.Y)
  * @param mixed $mixDefault
- * @return string or $mixDefault
+ * @return string or $mixDefault (null)
  *
  * <code>
  * echo format_time('2011-03-28 15:14:30'); // '28.03.1982'
@@ -405,17 +405,21 @@ function now()
  * echo format_time('2014-14-31', 'H:i:s', 'not valid'); // 'not valid'
  * </code>
  */
-function format_time($strTime, $strFormat = 'd.m.Y', $mixDefault = '')
+function format_time($strTime, $strFormat = 'd.m.Y', $mixDefault = null)
 {
-    if (empty($strTime)) {
+    if (empty($strTime) || $strTime === '0000-00-00 00:00:00' ||
+            $strTime === '0000-00-00' || $strTime === '00.00.0000') {
         return $mixDefault;
     }
     try {
         $date = new DateTime($strTime);
+        $strReturn = $date->format($strFormat);
+        if ($strReturn === false) {
+            return $mixDefault;
+        }
     } catch (Exception $ex) {
         return $mixDefault;
     }
-    $strReturn = $date->format($strFormat);
     return $strReturn;
 }
 
