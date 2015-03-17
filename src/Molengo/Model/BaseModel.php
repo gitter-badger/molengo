@@ -41,9 +41,6 @@ class BaseModel
     /** @var \Molengo\HtmlTemplate View template */
     public $view;
 
-    /** @var \Molengo\Model\UserModel */
-    public $user;
-
     /** @var DbMySql */
     protected $db = null;
 
@@ -70,12 +67,32 @@ class BaseModel
 
     /**
      * Returns database object
-     * 
+     *
      * @return \Molengo\DbMySql
      */
     public function getDb()
     {
         return $this->db;
+    }
+
+    /**
+     * Returns current user model
+     *
+     * @return \Model\UserModel
+     */
+    public function getUser()
+    {
+        return \App::getUser();
+    }
+
+    /**
+     * Returns current user id
+     *
+     * @return int
+     */
+    public function getUserId()
+    {
+        return \App::getUser()->get('user.id');
     }
 
 }
