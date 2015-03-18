@@ -408,7 +408,7 @@ function now()
 function format_time($strTime, $strFormat = 'd.m.Y', $mixDefault = null)
 {
     if (empty($strTime) || $strTime === '0000-00-00 00:00:00' ||
-            $strTime === '0000-00-00' || $strTime === '00.00.0000') {
+            $strTime === '0000-00-00') {
         return $mixDefault;
     }
     try {
