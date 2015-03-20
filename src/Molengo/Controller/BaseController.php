@@ -26,10 +26,11 @@
 
 namespace Molengo\Controller;
 
-use App;
-
 class BaseController
 {
+
+    /** @var \App WebApp */
+    public $app;
 
     /** @var \Molengo\Request HTTP request */
     public $request;
@@ -54,11 +55,22 @@ class BaseController
 
     public function __construct()
     {
-        $this->request = \App::getRequest();
-        $this->response = \App::getResponse();
-        $this->session = \App::getSession();
-        $this->view = \App::getView();
-        $this->user = \App::getUser();
+        $this->app = $this->getApp();
+        $this->request = $this->app->getRequest();
+        $this->response = $this->app->getResponse();
+        $this->session = $this->app->getSession();
+        $this->view = $this->app->getView();
+        $this->user = $this->app->getUser();
+    }
+
+    /**
+     * Returns App instance
+     *
+     * @return \App
+     */
+    public function getApp()
+    {
+        return \App::getInstance();
     }
 
     /**

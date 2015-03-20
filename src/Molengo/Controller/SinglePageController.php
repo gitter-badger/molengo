@@ -26,8 +26,6 @@
 
 namespace Molengo\Controller;
 
-use App;
-
 class SinglePageController extends \Molengo\Controller\BaseController
 {
 
@@ -36,7 +34,7 @@ class SinglePageController extends \Molengo\Controller\BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->cache = App::getCache();
+        $this->cache = $this->app->getCache();
     }
 
     public function getFiles($controller)

@@ -29,7 +29,7 @@ namespace Molengo;
 /**
  * WebApp (Service Locator)
  *
- * @version: 14.11.16.0
+ * @version: 15.03.20.0
  */
 class WebApp
 {
@@ -39,70 +39,103 @@ class WebApp
      *
      * @var array
      */
-    protected static $config = array();
+    protected $config = array();
 
     /**
      * Database
      *
-     * @var DbMySql
+     * @var \Molengo\DbMySql
      */
-    protected static $db = null;
+    protected $db = null;
 
     /**
      * View template
      *
-     * @var HtmlTemplate
+     * @var \Molengo\HtmlTemplate
      */
-    protected static $view = null;
+    protected $view = null;
 
     /**
      * Url router
      *
-     * @var SmartUrl
+     * @var \Molengo\SmartUrl
      */
-    protected static $router = null;
+    protected $router = null;
 
     /**
      * Session
      *
-     * @var Session
+     * @var \Molengo\Session
      */
-    protected static $session = null;
+    protected $session = null;
 
     /**
      * Request
      *
-     * @var Request
+     * @var \Molengo\Request
      */
-    protected static $request = null;
+    protected $request = null;
 
     /**
      * Response
      *
-     * @var Response
+     * @var \Molengo\Response
      */
-    protected static $response = null;
+    protected $response = null;
 
     /**
      * Cache
      *
-     * @var CacheFile
+     * @var \Molengo\CacheFile
      */
-    protected static $cache = null;
+    protected $cache = null;
 
     /**
      * Text
      *
-     * @var TranslationBase
+     * @var \Molengo\TranslationBase
      */
-    protected static $translation = null;
+    protected $translation = null;
 
     /**
      * User
      *
-     * @var CacheFile
+     * @var \Model\AppModel
      */
-    protected static $user = null;
+    protected $user = null;
+
+    /**
+     * Static instance ob App
+     *
+     * @var \Molengo\WebApp
+     */
+    protected static $instance;
+
+    /**
+     * Returns WebApp static instance
+     *
+     * @return \App
+     */
+    public static function getInstance()
+    {
+        if (static::$instance === null) {
+            static::$instance = new static();
+        }
+        return static::$instance;
+    }
+
+    /**
+     * Main
+     *
+     * @return void
+     */
+    public static function main()
+    {
+        $app = static::getInstance();
+        $app->init();
+        $app->run();
+        $app->close();
+    }
 
     /**
      * Init configuration
@@ -110,7 +143,7 @@ class WebApp
      * @return void
      * @throws Exception
      */
-    protected static function config()
+    public function config()
     {
 
     }
@@ -120,28 +153,28 @@ class WebApp
      *
      * @return void
      */
-    public static function init()
+    public function init()
     {
         // load config
-        static::config();
+        $this->config();
 
         // error reporting and handler
-        static::initErrorHandling();
+        $this->initErrorHandling();
 
         // session
-        static::initSession();
+        $this->initSession();
 
         // user session
-        static::initUser();
+        $this->initUser();
 
         // cache
-        static::initCache();
+        $this->initCache();
 
         // url mapping
-        static::initRouter();
+        $this->initRouter();
 
         // view templates
-        static::initView();
+        $this->initView();
     }
 
     /**
@@ -149,9 +182,9 @@ class WebApp
      *
      * @return void
      */
-    public static function run()
+    public function run()
     {
-        static::getRouter()->run();
+        $this->getRouter()->run();
     }
 
     /**
@@ -159,7 +192,7 @@ class WebApp
      *
      * @return void
      */
-    public static function close()
+    public function close()
     {
 
     }
@@ -169,12 +202,12 @@ class WebApp
      *
      * @return Session
      */
-    public static function getSession()
+    public function getSession()
     {
-        if (static::$session === null) {
-            static::$session = new Session();
+        if ($this->session === null) {
+            $this->session = new \Molengo\Session();
         }
-        return static::$session;
+        return $this->session;
     }
 
     /**
@@ -182,11 +215,11 @@ class WebApp
      *
      * @return void
      */
-    protected static function initSession()
+    protected function initSession()
     {
         // start session
-        $session = static::getSession();
-        $session->start(static::get('session.name'));
+        $session = $this->getSession();
+        $session->start($this->get('session.name'));
     }
 
     /**
@@ -194,9 +227,9 @@ class WebApp
      *
      * @return void
      */
-    public static function initUser()
+    public function initUser()
     {
-        $user = static::getUser();
+        $user = $this->getUser();
         // init language
         $user->setLocale('auto');
     }
@@ -206,12 +239,12 @@ class WebApp
      *
      * @return \Model\UserModel
      */
-    public static function getUser()
+    public function getUser()
     {
-        if (static::$user === null) {
-            static::$user = new \Model\UserModel();
+        if ($this->user === null) {
+            $this->user = new \Model\UserModel();
         }
-        return static::$user;
+        return $this->user;
     }
 
     /**
@@ -219,19 +252,19 @@ class WebApp
      *
      * @return TranslationGettext
      */
-    public static function getTranslation()
+    public function getTranslation()
     {
-        if (static::$translation === null) {
+        if ($this->translation === null) {
             // since php 5.5.x gettext under windows is not working (#66265)
             $boolWin = strtolower(substr(PHP_OS, 0, 3)) === 'win';
             $boolVersion = version_compare(PHP_VERSION, '5.5.0', '>=');
             if ($boolWin && $boolVersion) {
-                static::$translation = new TranslationMoFile();
+                $this->translation = new \Molengo\TranslationMoFile();
             } else {
-                static::$translation = new TranslationGettext();
+                $this->translation = new \Molengo\TranslationGettext();
             }
         }
-        return static::$translation;
+        return $this->translation;
     }
 
     /**
@@ -239,12 +272,12 @@ class WebApp
      *
      * @return HtmlTemplate
      */
-    public static function getView()
+    public function getView()
     {
-        if (static::$view === null) {
-            static::$view = new HtmlTemplate();
+        if ($this->view === null) {
+            $this->view = new \Molengo\HtmlTemplate();
         }
-        return static::$view;
+        return $this->view;
     }
 
     /**
@@ -252,13 +285,13 @@ class WebApp
      *
      * @return void
      */
-    protected static function initView()
+    protected function initView()
     {
-        $view = static::getView();
+        $view = $this->getView();
         $view->setTemplateDir(G_VIEW_DIR);
 
         // cache
-        $cache = static::getCache();
+        $cache = $this->getCache();
         $view->setCache($cache);
     }
 
@@ -267,12 +300,12 @@ class WebApp
      *
      * @return CacheFile
      */
-    public static function getCache()
+    public function getCache()
     {
-        if (static::$cache === null) {
-            static::$cache = new CacheFile();
+        if ($this->cache === null) {
+            $this->cache = new \Molengo\CacheFile();
         }
-        return static::$cache;
+        return $this->cache;
     }
 
     /**
@@ -280,12 +313,12 @@ class WebApp
      *
      * @return void
      */
-    protected static function initCache()
+    protected function initCache()
     {
-        $cache = static::getCache();
+        $cache = $this->getCache();
         $cache->setCacheDir(G_CACHE_DIR);
-        $cache->setCacheMode(static::get('cache.mode', 1));
-        $cache->setMinMode(static::get('cache.min', 1));
+        $cache->setCacheMode($this->get('cache.mode', 1));
+        $cache->setMinMode($this->get('cache.min', 1));
     }
 
     /**
@@ -293,12 +326,12 @@ class WebApp
      *
      * @return SmartUrl
      */
-    public static function getRouter()
+    public function getRouter()
     {
-        if (static::$router === null) {
-            static::$router = new SmartUrl();
+        if ($this->router === null) {
+            $this->router = new \Molengo\SmartUrl();
         }
-        return static::$router;
+        return $this->router;
     }
 
     /**
@@ -306,9 +339,9 @@ class WebApp
      *
      * @return void
      */
-    protected static function initRouter()
+    protected function initRouter()
     {
-        $router = static::getRouter();
+        $router = $this->getRouter();
         $router->addIndexRule();
         if (G_DEBUG) {
             $router->addXdebugRule();
@@ -322,12 +355,12 @@ class WebApp
      *
      * @return Request
      */
-    public static function getRequest()
+    public function getRequest()
     {
-        if (static::$request === null) {
-            static::$request = new Request();
+        if ($this->request === null) {
+            $this->request = new \Molengo\Request();
         }
-        return static::$request;
+        return $this->request;
     }
 
     /**
@@ -335,12 +368,12 @@ class WebApp
      *
      * @return Response
      */
-    public static function getResponse()
+    public function getResponse()
     {
-        if (static::$response === null) {
-            static::$response = new Response();
+        if ($this->response === null) {
+            $this->response = new \Molengo\Response();
         }
-        return static::$response;
+        return $this->response;
     }
 
     /**
@@ -349,26 +382,26 @@ class WebApp
      * @param array $arrEmail
      * @return boolean|string  true = ok else error message as string
      */
-    public static function sendMail($arrEmail)
+    public function sendMail($arrEmail)
     {
         // smtp or mail
-        $arrEmail['type'] = gv($arrEmail, 'type', static::get('smtp.type', 'smtp'));
+        $arrEmail['type'] = gv($arrEmail, 'type', $this->get('smtp.type', 'smtp'));
         // debugging: 1 = errors and messages, 2 = messages only
-        $arrEmail['debug'] = gv($arrEmail, 'debug', static::get('smtp.debug', 0));
-        $arrEmail['charset'] = gv($arrEmail, 'charset', static::get('smtp.charset', 'UTF-8'));
-        $arrEmail['smtpauth'] = gv($arrEmail, 'smtpauth', static::get('smtp.smtpauth', true));
-        $arrEmail['authtype'] = gv($arrEmail, 'authtype', static::get('smtp.authtype', 'LOGIN'));
+        $arrEmail['debug'] = gv($arrEmail, 'debug', $this->get('smtp.debug', 0));
+        $arrEmail['charset'] = gv($arrEmail, 'charset', $this->get('smtp.charset', 'UTF-8'));
+        $arrEmail['smtpauth'] = gv($arrEmail, 'smtpauth', $this->get('smtp.smtpauth', true));
+        $arrEmail['authtype'] = gv($arrEmail, 'authtype', $this->get('smtp.authtype', 'LOGIN'));
         // secure transfer enabled REQUIRED for GMail:  'ssl' or 'tls'
-        $arrEmail['secure'] = gv($arrEmail, 'secure', static::get('smtp.secure', false));
-        $arrEmail['host'] = gv($arrEmail, 'host', static::get('smtp.host', '127.0.0.1'));
-        $arrEmail['helo'] = gv($arrEmail, 'helo', static::get('smtp.helo', ''));
-        $arrEmail['port'] = gv($arrEmail, 'port', static::get('smtp.port', '25'));
-        $arrEmail['username'] = gv($arrEmail, 'username', static::get('smtp.username', ''));
-        $arrEmail['password'] = gv($arrEmail, 'password', static::get('smtp.password', ''));
-        $arrEmail['from'] = gv($arrEmail, 'from', static::get('smtp.from', ''));
-        $arrEmail['from_name'] = gv($arrEmail, 'from_name', static::get('smtp.from_name', ''));
-        $arrEmail['to'] = gv($arrEmail, 'to', static::get('smtp.to', ''));
-        $arrEmail['bcc'] = gv($arrEmail, 'bcc', static::get('smtp.bcc', ''));
+        $arrEmail['secure'] = gv($arrEmail, 'secure', $this->get('smtp.secure', false));
+        $arrEmail['host'] = gv($arrEmail, 'host', $this->get('smtp.host', '127.0.0.1'));
+        $arrEmail['helo'] = gv($arrEmail, 'helo', $this->get('smtp.helo', ''));
+        $arrEmail['port'] = gv($arrEmail, 'port', $this->get('smtp.port', '25'));
+        $arrEmail['username'] = gv($arrEmail, 'username', $this->get('smtp.username', ''));
+        $arrEmail['password'] = gv($arrEmail, 'password', $this->get('smtp.password', ''));
+        $arrEmail['from'] = gv($arrEmail, 'from', $this->get('smtp.from', ''));
+        $arrEmail['from_name'] = gv($arrEmail, 'from_name', $this->get('smtp.from_name', ''));
+        $arrEmail['to'] = gv($arrEmail, 'to', $this->get('smtp.to', ''));
+        $arrEmail['bcc'] = gv($arrEmail, 'bcc', $this->get('smtp.bcc', ''));
 
         $mixReturn = send_mail($arrEmail);
 
@@ -385,7 +418,7 @@ class WebApp
      * @param string $strFilename (optional)
      * @throws Exception
      */
-    public static function log($strLevel, $mixMessage, array $arrContext = array())
+    public function log($strLevel, $mixMessage, array $arrContext = array())
     {
         logmsg($strLevel, $mixMessage, $arrContext);
     }
@@ -396,16 +429,16 @@ class WebApp
      * @return DbMySql
      * @throws Exception
      */
-    public static function getDb()
+    public function getDb()
     {
-        if (static::$db === null) {
+        if ($this->db === null) {
             // open database connection
-            static::$db = new DbMySql();
-            if (!static::$db->connect(static::get('db.dsn'))) {
+            $this->db = new DbMySql();
+            if (!$this->db->connect($this->get('db.dsn'))) {
                 throw new Exception('Database connection failed!');
             }
         }
-        return static::$db;
+        return $this->db;
     }
 
     /**
@@ -415,9 +448,9 @@ class WebApp
      * @param mixed $mixValue
      * @return void
      */
-    public static function set($strKey, $mixValue)
+    public function set($strKey, $mixValue)
     {
-        static::$config[$strKey] = $mixValue;
+        $this->config[$strKey] = $mixValue;
     }
 
     /**
@@ -427,10 +460,10 @@ class WebApp
      * @param mixed $mixDefault
      * @return mixed
      */
-    public static function get($strKey, $mixDefault = '')
+    public function get($strKey, $mixDefault = '')
     {
-        if (isset(static::$config[$strKey])) {
-            return static::$config[$strKey];
+        if (isset($this->config[$strKey])) {
+            return $this->config[$strKey];
         } else {
             return $mixDefault;
         }
@@ -441,7 +474,7 @@ class WebApp
      *
      * @return void
      */
-    protected static function initErrorHandling()
+    protected function initErrorHandling()
     {
         // error reporting
         if (G_DEBUG) {
@@ -453,9 +486,10 @@ class WebApp
         }
 
         // global error handler
-        set_error_handler('\Molengo\WebApp::handleError', error_reporting());
-        set_exception_handler('\Molengo\WebApp::handleException');
-        register_shutdown_function('\Molengo\WebApp::handleShutdown');
+
+        set_error_handler(array($this, 'handleError'), error_reporting());
+        set_exception_handler(array($this, 'handleException'));
+        register_shutdown_function(array($this, 'handleShutdown'));
     }
 
     /**
@@ -465,9 +499,9 @@ class WebApp
      * @param ErrorException $error
      * @return boolean
      */
-    public static function handleException($error)
+    public function handleException($error)
     {
-        return static::handleErrorException($error);
+        return $this->handleErrorException($error);
     }
 
     /**
@@ -479,10 +513,10 @@ class WebApp
      * @param mixed $numLine
      * @return boolean
      */
-    public static function handleError($numCode, $strMessage, $strFilename, $numLine)
+    public function handleError($numCode, $strMessage, $strFilename, $numLine)
     {
         $error = new \ErrorException($strMessage, $numCode, 0, $strFilename, $numLine);
-        static::handleErrorException($error);
+        $this->handleErrorException($error);
         // true = continue script
         // false = exit script and set $php_errormsg
         return false;
@@ -494,7 +528,7 @@ class WebApp
      *
      * @return void
      */
-    public static function handleShutdown()
+    public function handleShutdown()
     {
         $arrError = error_get_last();
         if (empty($arrError)) {
@@ -506,7 +540,7 @@ class WebApp
             $strFile = $arrError['file'];
             $numLine = $arrError['line'];
             $error = new \ErrorException($strMessage, $numType, 0, $strFile, $numLine);
-            static::handleErrorException($error);
+            $this->handleErrorException($error);
         }
     }
 
@@ -514,7 +548,7 @@ class WebApp
      * Error Handler ErrorException object
      * @param ErrorException $error
      */
-    protected static function handleErrorException($error)
+    protected function handleErrorException($error)
     {
         $numCode = $error->getCode();
         $strCodeText = error_type_text($numCode);
@@ -528,7 +562,7 @@ class WebApp
         // verbose logging
         //$strError .= sprintf("\nGLOBALS dump:\n%s", dump_var($GLOBALS));
         // file logging
-        static::log('error', $strError);
+        $this->log('error', $strError);
 
         // check display error parameter
         $mixDisplayErrors = strtolower(trim(ini_get('display_errors')));

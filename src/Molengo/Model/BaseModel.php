@@ -29,6 +29,9 @@ namespace Molengo\Model;
 class BaseModel
 {
 
+    /** @var \App WebApp */
+    public $app;
+
     /** @var \Molengo\Request HTTP request */
     public $request;
 
@@ -51,18 +54,29 @@ class BaseModel
      */
     public function __construct(&$db = null)
     {
-        $this->request = \App::getRequest();
-        $this->response = \App::getResponse();
-        $this->session = \App::getSession();
-        $this->view = \App::getView();
+        $this->app = $this->getApp();
+        $this->request = $this->app->getRequest();
+        $this->response = $this->app->getResponse();
+        $this->session = $this->app->getSession();
+        $this->view = $this->app->getView();
 
         if ($db === null) {
             // default connection
-            $this->db = \App::getDb();
+            $this->db = $this->app->getDb();
         } else {
             // user defined connection
             $this->db = $db;
         }
+    }
+
+    /**
+     * Returns App instance
+     *
+     * @return \App
+     */
+    public function getApp()
+    {
+        return \App::getInstance();
     }
 
     /**
@@ -82,7 +96,7 @@ class BaseModel
      */
     public function getUser()
     {
-        return \App::getUser();
+        return $this->app->getUser();
     }
 
     /**
@@ -92,7 +106,7 @@ class BaseModel
      */
     public function getUserId()
     {
-        return \App::getUser()->get('user.id');
+        return $this->getUser()->get('user.id');
     }
 
 }

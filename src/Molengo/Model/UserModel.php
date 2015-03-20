@@ -2,8 +2,6 @@
 
 namespace Molengo\Model;
 
-use App;
-
 trait UserModel
 {
 
@@ -181,7 +179,7 @@ trait UserModel
     public function getToken($strValue, $strSecret = null)
     {
         if ($strSecret === null) {
-            $strSecret = App::get('app.secret');
+            $strSecret = $this->app->get('app.secret');
         }
         // create real key for value
         $strSessionId = $this->session->getId();
@@ -270,7 +268,7 @@ trait UserModel
         }
 
         // select locale handler class
-        $translation = App::getTranslation();
+        $translation = $this->app->getTranslation();
 
         // change gettext locale
         $boolReturn = $translation->setLocale($strLocale, $strDomain);
