@@ -29,14 +29,6 @@ namespace Molengo\Controller;
 class SinglePageController extends \Molengo\Controller\BaseController
 {
 
-    protected $cache;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->cache = $this->app->getCache();
-    }
-
     public function getFiles($controller)
     {
         $arrFiles = $this->call($controller, 'getPageFiles');
@@ -109,7 +101,7 @@ class SinglePageController extends \Molengo\Controller\BaseController
                     $arrEl[] = array(
                         'tag' => 'style',
                         'prob' => array(
-                            'innerHTML' => $this->cache->getFileContent($strFile)
+                            'innerHTML' => $this->view->getFileContent($strFile)
                         ),
                         'attr' => array(
                             'data-page' => 1,
@@ -133,7 +125,7 @@ class SinglePageController extends \Molengo\Controller\BaseController
                     $arrEl[] = array(
                         'tag' => 'script',
                         'prob' => array(
-                            'innerHTML' => $this->cache->getFileContent($strFile)
+                            'innerHTML' => $this->view->getFileContent($strFile)
                         ),
                         'attr' => array(
                             'type' => "text/javascript",
@@ -143,7 +135,7 @@ class SinglePageController extends \Molengo\Controller\BaseController
                 }
             } else {
                 // html
-                $strHtml .= $this->cache->getFileContent($strFile);
+                $strHtml .= $this->view->getFileContent($strFile);
             }
         }
 
@@ -181,7 +173,7 @@ class SinglePageController extends \Molengo\Controller\BaseController
         if (!empty($arrFiles)) {
             foreach ($arrFiles as $strFile) {
                 if ($strType == file_extension($strFile)) {
-                    $strContent .= $this->cache->getFileContent($strFile);
+                    $strContent .= $this->view->getFileContent($strFile);
                 }
             }
         }
