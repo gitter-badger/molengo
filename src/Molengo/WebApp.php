@@ -167,9 +167,6 @@ class WebApp
         // user session
         $this->initUser();
 
-        // cache
-        $this->initCache();
-
         // url mapping
         $this->initRouter();
 
@@ -289,36 +286,9 @@ class WebApp
     {
         $view = $this->getView();
         $view->setTemplateDir(G_VIEW_DIR);
-
-        // cache
-        $cache = $this->getCache();
-        $view->setCache($cache);
-    }
-
-    /**
-     * CacheFile
-     *
-     * @return CacheFile
-     */
-    public function getCache()
-    {
-        if ($this->cache === null) {
-            $this->cache = new \Molengo\CacheFile();
-        }
-        return $this->cache;
-    }
-
-    /**
-     * Init cache
-     *
-     * @return void
-     */
-    protected function initCache()
-    {
-        $cache = $this->getCache();
-        $cache->setCacheDir(G_CACHE_DIR);
-        $cache->setCacheMode($this->get('cache.mode', 1));
-        $cache->setMinMode($this->get('cache.min', 1));
+        $view->setCacheDir(G_VIEW_CACHE_DIR);
+        $view->setCacheMode($this->get('cache.mode', 1));
+        $view->setMinMode($this->get('cache.min', 1));
     }
 
     /**
