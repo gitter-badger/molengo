@@ -1028,5 +1028,5 @@ function error_type_text($num_type)
  */
 function __($strMessage, array $arrContext = array())
 {
-    return \App::getTranslation()->translate($strMessage, $arrContext);
+    return \App::getInstance()->getTranslation()->translate($strMessage, $arrContext);
 }
