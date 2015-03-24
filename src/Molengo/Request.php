@@ -431,4 +431,15 @@ class Request
                 $_SERVER['REMOTE_ADDR'] === '::1');
         return $boolReturn;
     }
+
+    /**
+     * Send forbidden response
+     *
+     * @return void
+     */
+    public function forbidden()
+    {
+        header('HTTP/1.1 403 Forbidden', true, 403);
+    }
+
 }
