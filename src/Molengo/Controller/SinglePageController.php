@@ -26,35 +26,18 @@
 
 namespace Molengo\Controller;
 
-class SinglePageController extends \Molengo\Controller\BaseController
+trait SinglePageController
 {
 
-    public function getFiles($controller)
+    public function getFiles()
     {
-        $arrFiles = $this->call($controller, 'getPageFiles');
+        $arrFiles = $this->getPageFiles();
         if (!empty($arrFiles)) {
             foreach ($arrFiles as $i => $strFile) {
-                $arrFiles[$i] = $this->getRealFilename($strFile);
+                $arrFiles[$i] = $this->view->getRealFilename($strFile);
             }
         }
         return $arrFiles;
-    }
-
-    /**
-     * Returns full path and filename
-     *
-     * @param string $strFilename
-     * @return string
-     */
-    protected function getRealFilename($strFilename)
-    {
-        $boolIsAbsolute = substr($strFilename, 0, 1) === '/' ||
-                substr($strFilename, 1, 1) === ':';
-
-        if (!$boolIsAbsolute) {
-            $strFilename = G_VIEW_DIR . '/' . $strFilename;
-        }
-        return $strFilename;
     }
 
     /**
@@ -62,7 +45,7 @@ class SinglePageController extends \Molengo\Controller\BaseController
      *
      * @return array
      */
-    public function getPageContent($controller, $arrParams)
+    public function getPageContent($arrParams)
     {
         $arrReturn = array();
         $strPage = $arrParams['page'];
@@ -71,7 +54,7 @@ class SinglePageController extends \Molengo\Controller\BaseController
         $arrEl = array();
 
         // get controller files
-        $arrFiles = $this->getFiles($controller, $arrParams);
+        $arrFiles = $this->getFiles($arrParams);
 
         $arrReturn['elements'] = null;
         $arrReturn['html'] = '';
@@ -144,7 +127,7 @@ class SinglePageController extends \Molengo\Controller\BaseController
         return $arrReturn;
     }
 
-    public function sendFileContent($controller, $arrParams = array())
+    public function sendFileContent($arrParams = array())
     {
         $strType = gv($arrParams, 'type');
         $strPage = gv($arrParams, 'page');
@@ -166,7 +149,7 @@ class SinglePageController extends \Molengo\Controller\BaseController
         $this->response->setHeader('Expires: 0');
 
         // get files from this page
-        $arrFiles = $this->getFiles($controller, $strPage);
+        $arrFiles = $this->getFiles($strPage);
 
         // append content by filetype
         $strContent = '';
@@ -180,6 +163,17 @@ class SinglePageController extends \Molengo\Controller\BaseController
 
         // print content
         echo $strContent;
+    }
+
+    /**
+     * Returns page files for single page app
+     *
+     * @var string $strPage page (optional)
+     * @return array
+     */
+    protected function getPageFiles($strPage = null)
+    {
+        return array();
     }
 
 }
