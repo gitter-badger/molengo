@@ -54,7 +54,7 @@ class BaseModel
      */
     public function __construct(&$db = null)
     {
-        $this->app = $this->getApp();
+        $this->app = \App::getInstance();
         $this->request = $this->app->getRequest();
         $this->response = $this->app->getResponse();
         $this->session = $this->app->getSession();
@@ -67,16 +67,6 @@ class BaseModel
             // user defined connection
             $this->db = $db;
         }
-    }
-
-    /**
-     * Returns App instance
-     *
-     * @return \App
-     */
-    public function getApp()
-    {
-        return \App::getInstance();
     }
 
     /**

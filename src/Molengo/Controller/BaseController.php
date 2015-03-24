@@ -55,87 +55,12 @@ class BaseController
 
     public function __construct()
     {
-        $this->app = $this->getApp();
+        $this->app = \App::getInstance();
         $this->request = $this->app->getRequest();
         $this->response = $this->app->getResponse();
         $this->session = $this->app->getSession();
         $this->view = $this->app->getView();
         $this->user = $this->app->getUser();
-    }
-
-    /**
-     * Returns App instance
-     *
-     * @return \App
-     */
-    public function getApp()
-    {
-        return \App::getInstance();
-    }
-
-    /**
-     * Register event callback
-     *
-     * @param type $strEvent
-     * @param type $callback
-     */
-    protected function on($strEvent, $callback)
-    {
-        $this->arrEvents[$strEvent][] = $callback;
-    }
-
-    /**
-     * Trigger event
-     *
-     * @param string $strEvent
-     * @param array $arrParams
-     * @return boolean
-     */
-    protected function trigger($strEvent, array $arrParams = null)
-    {
-        $boolReturn = false;
-        if (!empty($this->arrEvents[$strEvent])) {
-            foreach ($this->arrEvents[$strEvent] as $event) {
-                $boolReturn = $event[0]->$event[1]($arrParams);
-                if ($boolReturn === false) {
-                    return false;
-                }
-            }
-        }
-        return $boolReturn;
-    }
-
-    /**
-     * Call a PHP class function with optional parameters and return result
-     *
-     * @param object $controller
-     * @param string $strAction e.g. ClassName.echo
-     * @param array $arrParams parameter for function
-     * @return mixed return value from function
-     * @throws \Exception
-     */
-    protected function call($controller, $strAction, $arrParams = null)
-    {
-        $arrResult = null;
-        //$strMethod = substr(strrchr($strAction, "."), 1);
-        // check if function exist
-        $class = new \ReflectionClass($controller);
-        if (!$class->hasMethod($strAction)) {
-            throw new \Exception("Action '$strAction' not found");
-        }
-
-        $arrCallbackParams = array('method' => $strAction);
-        if (!$this->trigger('beforeCall', $arrCallbackParams)) {
-            throw new Exception('Permission denied', 403);
-        }
-
-        // call function
-        if ($arrParams === null) {
-            $arrResult = $controller->{$strAction}();
-        } else {
-            $arrResult = $controller->{$strAction}($arrParams);
-        }
-        return $arrResult;
     }
 
     /**
@@ -171,67 +96,6 @@ class BaseController
             $strJs = sprintf("<script>\$d.addText(%s);</script>", $strJs);
             $this->view->set('jstext', $strJs);
         }
-    }
-
-    /**
-     * JsonRpc request handler
-     *
-     * @throws \Exception
-     */
-    public function rpc()
-    {
-        $rpc = new \Molengo\Controller\JsonRpcController();
-        $rpc->setController($this);
-        $rpc->on('beforeCall', array($this, 'beforeCall'));
-        return $rpc->run();
-    }
-
-    /**
-     * Returns permission status before calling a function.
-     * You should override this function
-     *
-     * @param array $arrParams
-     * @return boolean
-     */
-    protected function beforeCall($arrParams)
-    {
-        return true;
-    }
-
-    /**
-     * Returns files content for single page app
-     *
-     * @return array
-     */
-    public function getPageContent($arrParams)
-    {
-        $sp = new \Molengo\Controller\SinglePageController();
-        $sp->on('beforeCall', array($this, 'beforeCall'));
-        $arrReturn = $sp->getPageContent($this, $arrParams);
-        return $arrReturn;
-    }
-
-    /**
-     * Send files content like js, css
-     *
-     * @param array $arrParams
-     * @return void
-     */
-    public function sendFileContent($arrParams)
-    {
-        $sp = new \Molengo\Controller\SinglePageController();
-        $sp->on('beforeCall', array($this, 'beforeCall'));
-        $sp->sendFileContent($this, $arrParams);
-    }
-
-    /**
-     * Returns page files for single page app
-     *
-     * @return array
-     */
-    protected function getPageFiles()
-    {
-        return array();
     }
 
 }
