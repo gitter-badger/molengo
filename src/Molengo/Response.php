@@ -120,7 +120,7 @@ class Response
     }
 
     /**
-     * Send variable as json string
+     * Send value as json string
      *
      * @param mixed $mixValue
      * @return boolean
@@ -128,7 +128,20 @@ class Response
     public function sendJson($mixValue)
     {
         $this->clean();
-        header('Content-Type: application/json');
+        // Send Json response header
+        if (!headers_sent()) {
+            header('Content-Type: application/json');
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+
+            if (isset($_SERVER['HTTP_ACCEPT_ENCODING'])) {
+                if (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) {
+                    ob_start('ob_gzhandler');
+                    header('Content-Encoding: gzip');
+                }
+            }
+        }
         echo encode_json($mixValue);
         return true;
     }
@@ -205,4 +218,5 @@ class Response
         readfile($strFilename);
         return true;
     }
+
 }
