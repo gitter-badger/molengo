@@ -31,46 +31,26 @@ namespace Molengo\Controller;
  * http://www.jsonrpc.org/specification
  *
  */
-class JsonRpcController extends \Molengo\Controller\BaseController
+trait JsonRpcController
 {
 
-    protected $controller;
-    protected $numLoggingMode = 1;
-
-    public function setController($controller)
-    {
-        $this->controller = $controller;
-    }
-
-    /**
-     * Set Logging Mode
-     *
-     * @param int $numLoggingMode how many details
-     * 0 = None
-     * 1 = Default
-     * 2 = Backtrace
-     * 3 = Response
-     * 4 = Verbose (Dump)
-     */
-    public function setLoggingMode($numLoggingMode)
-    {
-        $this->numLoggingMode = $numLoggingMode;
-    }
+    protected $numRpcLog = 1;
 
     /**
      * JsonRpc request handler
      *
      * @throws \Exception
      */
-    public function run()
+    public function rpc()
     {
         $arrRequest = array();
 
         try {
-            if (!$this->isRpc()) {
+
+            if (!$this->request->isJsonRpc()) {
                 throw new \Exception('Invalid Json-RPC request');
             }
-
+            // parse json
             $strRequest = file_get_contents('php://input');
             $arrRequest = decode_json($strRequest);
 
@@ -79,20 +59,34 @@ class JsonRpcController extends \Molengo\Controller\BaseController
             }
 
             $arrResult = array();
+            $strMethod = $arrRequest['method'];
 
-            $strRequestMethod = $arrRequest['method'];
+            $class = new \ReflectionClass($this);
+            if (!$class->hasMethod($strMethod)) {
+                throw new \Exception("Method '$strMethod' not found");
+            }
 
             // check if method is public
-            $method = new \ReflectionMethod($this->controller, $strRequestMethod);
+            $method = new \ReflectionMethod($this, $strMethod);
             if (!$method->isPublic()) {
-                throw new \Exception("Action '$strRequestMethod' is not public");
+                throw new \Exception("Action '$strMethod' is not public");
+            }
+
+            // check callback permission status
+            if (isset($arrRequest['params'])) {
+                $boolStatus = $this->beforeRpcCall($strMethod, $arrRequest['params']);
+            } else {
+                $boolStatus = $this->beforeRpcCall($strMethod);
+            }
+            if (!$boolStatus) {
+                throw new \Exception('Permission denied', 403);
             }
 
             // call function
             if (isset($arrRequest['params'])) {
-                $arrResult = $this->call($this->controller, $strRequestMethod, $arrRequest['params']);
+                $arrResult = $this->{$strMethod}($arrRequest['params']);
             } else {
-                $arrResult = $this->call($this->controller, $strRequestMethod, null);
+                $arrResult = $this->{$strMethod}();
             }
 
             // create response with result
@@ -100,14 +94,8 @@ class JsonRpcController extends \Molengo\Controller\BaseController
             $arrResponse['jsonrpc'] = '2.0';
             $arrResponse['id'] = gv($arrRequest, 'id', null);
             $arrResponse['result'] = $arrResult;
-            $strResponse = encode_json($arrResponse);
-
-            // send json string
-            if (ob_get_length() > 0) {
-                ob_clean();
-            }
-            $this->sendHeader();
-            echo $strResponse;
+            // send json rpc response
+            $this->response->sendJson($arrResponse);
         } catch (\Exception $ex) {
             // create json-rpc error object (code und message)
             $arrResponse = array();
@@ -115,76 +103,37 @@ class JsonRpcController extends \Molengo\Controller\BaseController
             $arrResponse['id'] = gv($arrRequest, 'id', null);
             $arrResponse['error']['code'] = $ex->getCode();
             $arrResponse['error']['message'] = $ex->getMessage();
-            $strResponse = encode_json($arrResponse);
-
             // log error details
-            $this->logError($ex, $strResponse);
-
-            if (ob_get_length() > 0) {
-                ob_clean();
-            }
-
-            $this->sendHeader();
-            echo $strResponse;
+            $this->onRpcError($ex, $arrResponse);
+            // send json rpc response
+            $this->response->sendJson($arrResponse);
         }
     }
 
     /**
-     * Return if a JSON-RCP request has been received
+     * Returns permission status before calling a function.
+     * You can override this function
      *
      * @return boolean
      */
-    public function isRpc()
+    protected function beforeRpcCall()
     {
-        $boolReturn = $_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_SERVER['CONTENT_TYPE']);
-        $boolReturn = $boolReturn && (strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false);
-        return $boolReturn;
+        return true;
     }
 
     /**
-     * Send forbidden response and exit
-     *
-     * @return void
-     */
-    protected function exitForbidden()
-    {
-        header('HTTP/1.1 403 Forbidden', true, 403);
-        exit;
-    }
-
-    /**
-     * Send Json response header
-     *
-     * @return void
-     */
-    protected function sendHeader()
-    {
-        if (!headers_sent()) {
-            header('Content-Type: application/json');
-            header('Cache-Control: no-cache, no-store, must-revalidate');
-            header('Pragma: no-cache');
-            header('Expires: 0');
-
-            if (isset($_SERVER['HTTP_ACCEPT_ENCODING'])) {
-                if (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) {
-                    ob_start('ob_gzhandler');
-                    header('Content-Encoding: gzip');
-                }
-            }
-        }
-    }
-
-    /**
-     * Log error message
+     * Log RPC error message
      *
      * @param \Exception $ex
-     * @param string $strResponse json response
+     * @param string $mixValue value
+     * @return void
      */
-    protected function logError($ex, $strResponse = null)
+    protected function onRpcError($ex, $mixValue = null)
     {
-        if ($this->numLoggingMode == 0) {
+        if (!$this->numRpcLog) {
             return;
         }
+
         // get error infos
         $numErrorCode = $ex->getCode();
         $strErrorCodeText = error_type_text($numErrorCode);
@@ -195,20 +144,21 @@ class JsonRpcController extends \Molengo\Controller\BaseController
 
         // log error details
         $strError = '';
-        if ($this->numLoggingMode >= 1) {
+        if ($this->numRpcLog >= 1) {
             $strError .= sprintf("Error: [%s] %s in %s on line %s.", $strErrorCodeText, $strErrorMessage, $strErrorFile, $numErrorLine);
         }
 
-        if ($this->numLoggingMode >= 2) {
+        if ($this->numRpcLog >= 2) {
             $strError .= sprintf("\nBacktrace:\n%s", $strErrorTrace);
         }
 
-        if ($this->numLoggingMode >= 3) {
+        if ($this->numRpcLog >= 3) {
+            $strResponse = encode_json($mixValue);
             $strError .= sprintf("\nResponse:\n%s", $strResponse);
         }
 
         // verbose logging mode
-        if ($this->numLoggingMode >= 4) {
+        if ($this->numRpcLog >= 4) {
             $strError .= sprintf("\nGLOBALS:\n%s", dump_var($GLOBALS));
         }
 
