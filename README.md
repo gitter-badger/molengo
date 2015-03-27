@@ -33,6 +33,6 @@ Architecture
 Documentation
 =====
 
-* [read more](https://github.com/odan/molengo-docs)
+* [read more](http://www.molengo.com/doku.php?id=docs)
 
 
