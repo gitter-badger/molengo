@@ -536,6 +536,7 @@ class DbMySql
 
         echo "\n<pre>";
     }
+
     // -------------------------------------------------------------------------
     // Database helper
     // -------------------------------------------------------------------------
@@ -1222,6 +1223,7 @@ class DbMySql
         $arrFields = $this->getTableColumns($strTable);
 
         if (!empty($arrFields)) {
+            $arrExclude = array_flip($arrExclude);
             foreach ($arrFields as $value) {
                 $strField = $value['column_name'];
                 if (isset($arrExclude[$strField])) {
@@ -1324,4 +1326,5 @@ class DbMySql
     {
         return $this->connection->rollBack();
     }
+
 }
