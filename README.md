@@ -1,5 +1,7 @@
 Molengo
 =======
+
+[![Join the chat at https://gitter.im/odan/molengo](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/odan/molengo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Molengo Framework, a PHP micro framework
 
 
